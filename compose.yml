@@ -1,0 +1,25 @@
+services:
+  test-stream:
+    build: .
+  promtail:
+      image: grafana/promtail:latest
+      container_name: promtail
+      restart: unless-stopped
+      environment:
+        PROMTAIL_HTTP_PORT: ${PROMTAIL_HTTP_PORT}
+        PROMTAIL_POSITIONS_FILE: ${PROMTAIL_POSITIONS_FILE}
+        LOKI_URL: ${LOKI_URL}
+        DOCKER_SOCKET: ${DOCKER_SOCKET}
+        REFRESH_INTERVAL: ${REFRESH_INTERVAL}
+        LOGGING_LABEL: ${LOGGING_LABEL}
+        HOSTNAME: ${HOSTNAME}
+      volumes:
+        - /var/lib/docker/containers:/var/lib/docker/containers:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      command:
+        - "-config.expand-env=true"
+        - "-config.file=/etc/promtail/config.yml"
+      labels:
+        logging: promtail
+        logging_jobname: "promtail"
